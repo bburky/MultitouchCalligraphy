@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0'>
+    <title>Multitouch Calligraphy</title>
+  </head>
+  <body>
+    <script src='raphael-min.js'></script>
+    <script>
+// Creates canvas 320 × 200 at 10, 50
+var paper = Raphael(0, 0, window.innerWidth, window.innerHeight);
+
+// Creates circle at x = 50, y = 40, with radius 10
+var circle = paper.circle(50, 40, 10);
+// Sets the fill attribute of the circle to red (#f00)
+circle.attr('fill', '#f00');
+
+// Sets the stroke attribute of the circle to white
+circle.attr('stroke', '#fff');
+
+var c2 = paper.circle(300, 500, 50);
+// Sets the fill attribute of the circle to red (#f00)
+c2.attr('fill', '#f00');
+c2.attr('stroke', '#fff');
+
+
+var p = paper.path()
+
+var body = document.body;
+body.addEventListener('touchstart', handleStart, false);
+body.addEventListener('touchmove', handleMove, false);
+body.addEventListener('touchend', handleEnd, false);
+
+var unpairedStroke;
+var pairedStrokes = {};
+var strokes = [];
+
+function pointsToPathString(points, reverse, moveTo) {
+  var path, i;
+
+  if (!reverse) {
+    if (moveTo === undefined || moveTo) {
+      i = 1;
+      path = ['M', points[0][0], points[0][1]];
+    } else {
+      i = 0;
+      path = [];
+    }
+    for (; i < points.length; i++) {
+      path.push('L');
+      path.push(points[i][0]);
+      path.push(points[i][1]);
+    }
+    return path.join(' ');
+  } else {
+    if (moveTo === undefined || moveTo) {
+      i = points.length-2;
+      path = ['M', points[points.length-1][0], points[points.length-1][1]];
+    } else {
+      i = points.length-1;
+      path = [];
+    }
+    for (; i >= 0; i--) {
+      path.push('L');
+      path.push(points[i][0]);
+      path.push(points[i][1]);
+    }
+    return path.join(' ');
+  }
+}
+
+function updateStrokeShape(stroke) {
+  if (stroke.strokes.length !== 2) {
+    return;
+  }
+
+  if (stroke.shape) {
+    //stroke.shape.remove();
+  }
+
+  stroke.shape = paper.path(
+    pointsToPathString(stroke.strokes[0].points, false, true) +
+    pointsToPathString(stroke.strokes[1].points, true, false) +
+    'Z'
+  );
+  stroke.shape.attr({'fill': '#000', 'stroke': '#000'});
+}
+
+function handleStart(evt) {
+  evt.preventDefault();
+  var touches = evt.changedTouches;
+
+  for (var i=0; i<touches.length; i++) {
+    var path = paper.path(['M', touches[i].pageX, touches[i].pageY].join(' '));
+    var id = touches[i].identifier
+    path.attr('fill', '#aaa');
+    path.attr('stroke', '#000');
+    var stroke = {path: path, points: [[touches[i].pageX, touches[i].pageY]], id: id};
+
+    if (unpairedStroke) {
+      unpairedStroke.strokes.push(stroke);
+      pairedStrokes[id] = {data: unpairedStroke, stroke: stroke};
+      unpairedStroke = undefined;
+    } else {
+      unpairedStroke = {strokes: [stroke]};
+      pairedStrokes[id] = {data: unpairedStroke, stroke: stroke};
+      strokes.push(unpairedStroke);
+    }
+  }
+}
+
+function handleMove(evt) {
+  evt.preventDefault();
+  var touches = evt.changedTouches;
+
+  for (var i=0; i<touches.length; i++) {
+    var id = touches[i].identifier;
+    var strokeDataPaired = pairedStrokes[id];
+    var strokeData = strokeDataPaired.data;
+    var stroke = strokeDataPaired.stroke;
+
+    stroke.path.remove();
+    stroke.points.push([touches[i].pageX, touches[i].pageY]);
+    var path = paper.path(pointsToPathString(stroke.points));
+    stroke.path = path;
+
+    updateStrokeShape(strokeData);
+  }
+}
+
+function handleEnd(evt) {
+  evt.preventDefault();
+  var touches = evt.changedTouches;
+  for (var i=0; i<touches.length; i++) {
+    var id = touches[i].identifier;
+    var strokeDataPaired = pairedStrokes[id];
+    var strokeData = strokeDataPaired.data;
+    var stroke = strokeDataPaired.stroke;
+
+    stroke.path.remove();
+    stroke.points.push([touches[i].pageX, touches[i].pageY]);
+    var path = paper.path(pointsToPathString(stroke.points));
+    stroke.path = path;
+
+    delete pairedStrokes[id];
+    if (unpairedStroke === strokeData) {
+      unpairedStroke = undefined;
+    }
+
+    updateStrokeShape(strokeData);
+  }
+}
+
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Multitouch Calligraphy</title>
+  </head>
+  <body>
+    <script src="raphael-min.js"></script>
+    <script>
+// Creates canvas 320 × 200 at 10, 50
+var paper = Raphael(0, 0, window.innerWidth, window.innerHeight);
+
+// Creates circle at x = 50, y = 40, with radius 10
+var circle = paper.circle(50, 40, 10);
+// Sets the fill attribute of the circle to red (#f00)
+circle.attr("fill", "#f00");
+
+// Sets the stroke attribute of the circle to white
+circle.attr("stroke", "#fff");
+
+var p = paper.path()
+
+var body = document.getElementsByTagName("body")[0];
+body.addEventListener("touchstart", handleStart, false);
+body.addEventListener("touchmove", handleStart, false);
+body.addEventListener("touchend", handleStart, false);
+
+function handleStart(evt) {
+  evt.preventDefault();
+  var touches = evt.changedTouches;
+
+  for (var i=0; i<touches.length; i++) {
+    var e = paper.ellipse(touches[i].pageX, touches[i].pageY, touches[i].webkitRadiusX/10, touches[i].webkitRadiusY/10);
+    e.attr("fill", "#f00");
+    e.attr("stroke", "#fff");
+  }
+
+}
+    </script>
+  </body>
+</html>
+
