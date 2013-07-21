@@ -26,13 +26,12 @@ function touchstart (event) {
       stroke = {
         color: '#' + Math.floor(Math.random() * 0xffffff).toString(16),
         points: {},
-        path: paper.path(['M', x, y].join(' '))
+        paths: []
       };
       unpaired = stroke;
       currentstrokes[id] = stroke;
 
       stroke.points[id] = [ [x, y] ];
-      stroke.path.attr('fill', stroke.color);
     } else {
       console.log('paired start: ' + id + ' x:' + x + ' y:' + y);
 
@@ -41,7 +40,6 @@ function touchstart (event) {
       currentstrokes[id] = stroke;
 
       stroke.points[id] = [ [x, y] ];
-      stroke.path.attr('path', generatePathData(stroke));
     }
   }
 }
@@ -66,7 +64,6 @@ function touchmove (event) {
       panning.y = y;
     } else if (currentstrokes[id] === undefined) {
       console.warn('move: id already ended:' + id);
-      console.log(panning);
     } else if (currentstrokes[id] === unpaired && panning === undefined) {
       console.log('panning start: ' + id + ' x:' + x + ' y:' + y);
 
@@ -96,8 +93,37 @@ function touchmove (event) {
 
       stroke = currentstrokes[id];
 
+      // Get other id for this stroke
+      var otherId;
+      for (otherId in stroke.points) {
+        if (stroke.points.hasOwnProperty(otherId)) {
+          if (otherId != id) {
+            // Note that otherId is a string, JS object keys are absurd and
+            // are only strings
+            break;
+          }
+        }
+      }
+
+      var pointsA = stroke.points[id];
+      var pointA = pointsA[pointsA.length - 1];
+
+      var pointsB = stroke.points[otherId];
+      var pointB = pointsB[pointsB.length - 1];
+
+      var path = paper.path(
+        [
+          'M', pointA[0], pointA[1],
+          'L', pointB[0], pointB[1],
+          'L', x, y,
+          'Z'
+        ].join(' ')
+      );
+      path.attr('fill', stroke.color);
+      path.attr('stroke', stroke.color);
+      stroke.paths.push(path);
+
       stroke.points[id].push([ [x, y] ]);
-      stroke.path.attr('path', generatePathData(stroke));
     }
   }
 }
@@ -130,38 +156,6 @@ function touchend (argument) {
       delete currentstrokes[id];
     }
   }
-}
-
-function generatePathData (stroke) {
-  var pathData = [];
-  var first = true;
-  var i;
-
-  // Loop over both arrays of points
-  for (var id in stroke.points) {
-    if (stroke.points.hasOwnProperty(id)) {
-      var points = stroke.points[id];
-
-      if (first) {
-        // Loop over the first list of points, first starting the path, then
-        // adding each point
-        first = false;
-        pathData.push('M', points[0][0], points[0][1]);
-        for (i = 2; i < points.length; i++) {
-          pathData.push('L', points[i][0], points[i][1]);
-        }
-      } else {
-        // Loop over the second list of points in reverse order, adding each
-        // and then closing the path
-        for (i = points.length - 1; i >= 0; i--) {
-          pathData.push('L', points[i][0], points[i][1]);
-        }
-        pathData.push('Z');
-      }
-    }
-  }
-
-  return pathData.join(' ');
 }
 
 var circle = paper.circle(50, 40, 10);
