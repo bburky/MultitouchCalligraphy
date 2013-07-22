@@ -1,6 +1,8 @@
-var container = document.getElementById('canvas-container');
+var canvas = document.getElementById('paper-canvas');
 var size = Math.min(window.innerWidth, window.innerHeight);
-var paper = Raphael(container, size, size);
+canvas.height = size;
+canvas.width = size;
+paper.setup(canvas);
 
 var unpaired;
 var currentstrokes = {};
@@ -58,7 +60,8 @@ function touchmove (event) {
 
       xOffset += panning.x - x;
       yOffset += panning.y - y;
-      paper.setViewBox(xOffset, yOffset, size, size, false);
+      // TODO: fix panning for paper.js
+      // paper.setViewBox(xOffset, yOffset, size, size, false);
 
       panning.x = x;
       panning.y = y;
@@ -111,16 +114,14 @@ function touchmove (event) {
       var pointsB = stroke.points[otherId];
       var pointB = pointsB[pointsB.length - 1];
 
-      var path = paper.path(
-        [
-          'M', pointA[0], pointA[1],
-          'L', pointB[0], pointB[1],
-          'L', x, y,
-          'Z'
-        ].join(' ')
-      );
-      path.attr('fill', stroke.color);
-      path.attr('stroke', stroke.color);
+      var path = new paper.Path();
+      path.add(new paper.Point(pointA[0], pointA[1]));
+      path.add(new paper.Point(pointB[0], pointB[1]));
+      path.add(new paper.Point(x, y));
+      path.closed = true;
+
+      path.fillColor = stroke.color;
+      path.strokeColor = stroke.color;
       stroke.paths.push(path);
 
       stroke.points[id].push([ [x, y] ]);
@@ -158,10 +159,7 @@ function touchend (argument) {
   }
 }
 
-var circle = paper.circle(50, 40, 10);
-circle.attr('fill', '#f00');
-
-container.addEventListener('touchstart', touchstart, false);
-container.addEventListener('touchmove', touchmove, false);
-container.addEventListener('touchend', touchend, false);
+canvas.addEventListener('touchstart', touchstart, false);
+canvas.addEventListener('touchmove', touchmove, false);
+canvas.addEventListener('touchend', touchend, false);
 
