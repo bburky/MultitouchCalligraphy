@@ -28,12 +28,15 @@ function touchstart (event) {
       stroke = {
         color: '#' + Math.floor(Math.random() * 0xffffff).toString(16),
         points: {},
-        paths: []
+        path: new paper.Path()
       };
       unpaired = stroke;
       currentstrokes[id] = stroke;
 
       stroke.points[id] = [ [x, y] ];
+
+      // Somehow this fixes uniting with an empty Path
+      stroke.path.closed = true;
     } else {
       console.log('paired start: ' + id + ' x:' + x + ' y:' + y);
 
@@ -77,7 +80,7 @@ function touchmove (event) {
 
       xOffset += stroke.points[id][0][0] - x;
       yOffset += stroke.points[id][0][1] - y;
-      paper.setViewBox(xOffset, yOffset, size, size, false);
+      // paper.setViewBox(xOffset, yOffset, size, size, false);
 
       panning = {
         id: id,
@@ -115,14 +118,16 @@ function touchmove (event) {
       var pointB = pointsB[pointsB.length - 1];
 
       var path = new paper.Path();
+      path.add(new paper.Point(x, y));
       path.add(new paper.Point(pointA[0], pointA[1]));
       path.add(new paper.Point(pointB[0], pointB[1]));
-      path.add(new paper.Point(x, y));
       path.closed = true;
 
-      path.fillColor = stroke.color;
-      path.strokeColor = stroke.color;
-      stroke.paths.push(path);
+      var united = stroke.path.unite(path);
+      stroke.path.remove();
+      stroke.path = united;
+      stroke.path.fillColor = stroke.color;
+      stroke.path.strokeColor = stroke.color;
 
       stroke.points[id].push([ [x, y] ]);
     }
