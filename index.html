@@ -1,3 +1,3 @@
 <script>l=addEventListener
-l('touchmove',e=>{with(a.getContext`2d`)beginPath(fill(e.preventDefault())),o.reverse().map(t=>lineTo(t[0],t[1])),o=Array.from(e.touches,t=>lineTo(x=t.pageX,y=t.pageY)||[x,y])},{passive:false})
+l('touchmove',e=>{with(a.getContext`2d`)beginPath(fill(e.preventDefault())),o.reverse().map(t=>lineTo(t[0],t[1])),o=Array.from(e.touches,t=>lineTo(x=t.pageX,y=t.pageY)||[x,y])},{passive:0})
 l('touchstart',e=>{if(e.touches.length==e.changedTouches.length)o=[]})</script><canvas id=a width=1000 height=2000>
