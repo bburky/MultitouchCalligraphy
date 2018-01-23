@@ -1,2 +1,2 @@
-<canvas id=a width=1000 height=2000><script>ontouchstart=e=>e.touches.length==e.changedTouches.length&&(o=[])
-addEventListener('touchmove',e=>{with(a.getContext`2d`)beginPath(e.preventDefault(f=t=>fill(lineTo(x=t.pageX,y=t.pageY))||t)),o.reverse().map(f),o=Array.from(e.touches,f)},{passive:0})</script>
+<canvas style=touch-action:none id=a width=1000 height=2000><script>ontouchstart=e=>e.touches.length==e.changedTouches.length&&(o=[])
+addEventListener('touchmove',e=>{with(a.getContext`2d`)beginPath(f=t=>fill(lineTo(x=t.pageX,y=t.pageY))||t),o.reverse().map(f),o=Array.from(e.touches,f)})</script>
