@@ -2,4 +2,4 @@
 width=1000 height=2000
 style=touch-action:none
 ontouchstart=event.touches.length==event.changedTouches.length&&(o=[])
-ontouchmove="with(this.getContext`2d`)beginPath(f=t=>fill(lineTo(t.pageX,t.pageY))||t),o.reverse().map(f),o=Array.from(event.touches,f)">
+ontouchmove="with(this.getContext`2d`)o.reverse(beginPath(f=t=>fill(lineTo(t.pageX,t.pageY))||t)).map(f),o=Array.from(event.touches,f)">
